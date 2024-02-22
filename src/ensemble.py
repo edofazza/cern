@@ -52,7 +52,7 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
                     selected_models.append(model)
 
             if not selected_models:
-                j -= 1
+                j += 1
                 if j == k:
                     selected_models.append(models[0])
             else:
@@ -96,3 +96,57 @@ def dynamic_ensemble_cifar(n, transform, k):
     collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'validation')
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'test')
+    #return pairs
+
+
+"""def generated_trained_samples(pairs, n, k):
+    with open("knn.pkl", "rb") as f:
+        knn = pkl.load(f)
+
+    # get models
+    models = list()
+    for i in range(n):
+        model = LeNet()
+        model.load_state_dict(torch.load(f'model_{i}.pt'))
+        models.append(model)
+
+    samples_path = [s_path for s_path in os.listdir('generated') if s_path.endswith('.npy')]
+    for sample in samples_path:
+        sample = np.load(f'generated/{sample}')
+        flatted_sample = sample.reshape(1, sample.shape[0] * sample.shape[1] * sample.shape[2])
+        indices = knn.kneighbors(flatted_sample, return_distance=False)[0]
+
+        j = 0
+        while True:
+            tmp_indices = indices[0:-j]
+            # create a batch of those sample
+            closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
+            closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
+            # evaluate models
+            batched_pairs = torch.from_numpy(np.array(closest_pairs_input)).to('cuda')
+            selected_models = []
+            for model in models:
+                model = model.to('cuda')
+                model.eval()
+                outputs = model(batched_pairs)
+                _, predicted = torch.max(outputs, 1)
+                closest_pairs_label = torch.from_numpy(np.array(closest_pairs_label).reshape(len(closest_pairs_label)))
+                total_correct = (predicted.detach().cpu() == closest_pairs_label).sum().item()
+                # select only the models that can classify correctly all kNN
+                if total_correct == len(closest_pairs_input):
+                    selected_models.append(model)
+
+            if not selected_models:
+                j += 1
+                if j == k:
+                    selected_models.append(models[0])
+            else:
+                break
+
+        # create ensemble
+        ensemble = EnsembleModel(selected_models).to('cuda')
+        # classify with the ensemble
+        outputs = ensemble(torch.from_numpy(sample).reshape(-1).to('cuda'))
+        np.save(f'training/{str(uuid.uuid4())[:16]}.npy',
+                [sample, outputs[0].detach().cpu().numpy()])"""
+
