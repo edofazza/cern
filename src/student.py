@@ -133,13 +133,12 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
     return model
 
 
-def evaluate_student(g_model: nn.Module, n: int, transform: Callable,
+def evaluate_student(g_model: nn.Module, transform: Callable,
          batch_size: int = 256, learning_rate: float = 0.001, epochs: int = 10,
          train_val_split: float = 0.8, device: str = 'cuda') -> None:
     assert 0.0 < train_val_split < 1.0
     assert epochs > 0
     assert learning_rate > 0
-    assert n > 1
     assert batch_size > 0
     print('\n\n\n\n\n\n\nG NETWORK RESULTS:')
     train_loader, val_loader, test_loader = get_CIFAR(transform, batch_size, train_val_split)
