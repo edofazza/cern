@@ -14,8 +14,8 @@ def get_CIFAR(transform: Callable, batch_size: int = 64, train_val_split: float 
     val_size = len(full_train_dataset) - train_size
     train_dataset, val_dataset = random_split(full_train_dataset, [train_size, val_size], torch.Generator().manual_seed(42))
 
-    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    val_loader = DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     test_dataset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     return train_loader, val_loader, test_loader

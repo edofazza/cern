@@ -11,7 +11,7 @@ from traineval import train, evaluate
 
 
 def train_single_models(f_model: Type[nn.Module], n: int, transform: Callable,
-         batch_size: int = 64, learning_rate: float = 0.001, epochs: int = 10,
+         batch_size: int = 256, learning_rate: float = 0.001, epochs: int = 10,
          train_val_split: float = 0.8, device: str = 'cuda') -> None:
     assert 0.0 < train_val_split < 1.0
     assert epochs > 0
@@ -37,6 +37,7 @@ def train_single_models(f_model: Type[nn.Module], n: int, transform: Callable,
         if best_overall_average_loss < overall_average_loss:
             early_stopping_counter += 1
             if early_stopping_counter > 5:
+                print('EARLY STOPPING, 5 epochs without improving')
                 break
         else:
             best_overall_average_loss = overall_average_loss
