@@ -96,5 +96,3 @@ def dynamic_ensemble_cifar(n, transform, k):
     collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'validation')
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'test')
-
-
