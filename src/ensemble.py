@@ -1,0 +1,100 @@
+import torch
+import torch.nn as nn
+from typing import List
+from sklearn.neighbors import NearestNeighbors
+import numpy as np
+import pickle as pkl
+import uuid
+import os
+
+from dataset import get_CIFAR
+from lenet import LeNet
+
+
+class EnsembleModel(nn.Module):
+    def __init__(self, models: List[nn.Module], *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.models = nn.ModuleList(models)
+
+    def forward(self, x) -> torch.Tensor:
+        outputs = [model(x) for model in self.models]
+        return torch.mean(torch.stack(outputs), dim=0)
+
+
+def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='training'):
+    corrects = 0
+    for input, label in loader:
+        input_numpy = input[0].numpy()
+        input_numpy = input_numpy.reshape(1, input_numpy.shape[0] * input_numpy.shape[1] * input_numpy.shape[2])
+        # select kNN of input
+        indices = knn.kneighbors(input_numpy, return_distance=False)[0]
+        j = 0
+        while True:
+            if mode == 'training':
+                tmp_indices = indices[1:-j]
+            else:
+                tmp_indices = indices[0:-j]
+            # create a batch of those sample
+            closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
+            closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
+            # evaluate models
+            batched_pairs = torch.from_numpy(np.array(closest_pairs_input)).to('cuda')
+            selected_models = []
+            for model in models:
+                model = model.to('cuda')
+                model.eval()
+                outputs = model(batched_pairs)
+                _, predicted = torch.max(outputs, 1)
+                closest_pairs_label = torch.from_numpy(np.array(closest_pairs_label).reshape(len(closest_pairs_label)))
+                total_correct = (predicted.detach().cpu() == closest_pairs_label).sum().item()
+                # select only the models that can classify correctly all kNN
+                if total_correct == len(closest_pairs_input):
+                    selected_models.append(model)
+
+            if not selected_models:
+                j -= 1
+                if j == k:
+                    selected_models.append(models[0])
+            else:
+                break
+
+        # create ensemble
+        ensemble = EnsembleModel(selected_models).to('cuda')
+        # classify with the ensemble
+        outputs = ensemble(input.to('cuda'))
+        _, predicted = torch.max(outputs, 1)
+        if predicted.detach().cpu() == label:
+            corrects += 1
+        np.save(f'{mode}/{str(uuid.uuid4())[:16]}.npy', [input.detach().cpu().numpy(), outputs[0].detach().cpu().numpy()])
+    print(f'\t- {mode} accuracy: {corrects/len(loader)}')
+
+
+def dynamic_ensemble_cifar(n, transform, k):
+    # get CIFAR test
+    train_loader, val_loader, test_loader = get_CIFAR(transform, batch_size=1)
+    # get models
+    models = list()
+    for i in range(n):
+        model = LeNet()
+        model.load_state_dict(torch.load(f'model_{i}.pt'))
+        models.append(model)
+
+    pairs = []
+    for input, label in train_loader:
+        pairs.append((input.reshape(input.shape[1] * input.shape[2] * input.shape[3]), label))
+    # Create kNN
+    samples = [pair[0] for pair in pairs]
+    knn = NearestNeighbors(n_neighbors=k + 1, algorithm='ball_tree').fit(samples)
+    with open("knn.pkl", "wb") as f:
+        pkl.dump(knn, f)
+    # with open("knn.pkl", "rb") as f:
+    #  knn = pkl.load(f)
+    print('\n\n\n\n\n\nDYNAMIC ENSEMBLE PERFORMANCE:')
+    os.mkdir('training')
+    os.mkdir('validation')
+    os.mkdir('test')
+    collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
+    collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'validation')
+    collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'test')
+
+
