@@ -25,4 +25,3 @@ if __name__ == '__main__':
     train_single_models(LeNet, 8, transform, epochs=500)
 
     dynamic_ensemble_cifar(8, transform, 4)
-    
