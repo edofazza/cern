@@ -187,6 +187,6 @@ def generated_trained_samples(transform, n, k):
         # create ensemble
         ensemble = EnsembleModel(selected_models).to('cuda')
         # classify with the ensemble
-        outputs = ensemble(torch.from_numpy(sample).reshape(-1).to('cuda'))
+        outputs = ensemble(torch.from_numpy(sample).to('cuda'))
         np.save(f'generated_label/{sample}', outputs[0].detach().cpu().numpy())
 
