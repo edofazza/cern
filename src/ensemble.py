@@ -64,12 +64,10 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             ensemble = EnsembleModel(selected_models).to('cuda')
             # classify with the ensemble
             outputs = ensemble(input.to('cuda'))
-            print(input)
-            print(outputs)
             _, predicted = torch.max(outputs, 1)
             if predicted.detach().cpu() == label:
                 corrects += 1
-            np.save(f'{mode}/{str(uuid.uuid4())[:16]}.npy', [input.detach().cpu().numpy(), outputs[0].detach().cpu().numpy()])
+            np.save(f'{mode}/{str(uuid.uuid4())[:16]}.npy', [input.detach().cpu().numpy(), outputs[0].detach().cpu().numpy()], allow_pickle=True)
     print(f'\t- {mode} accuracy: {corrects/len(loader)}')
 
 
