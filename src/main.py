@@ -25,11 +25,11 @@ if __name__ == '__main__':
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    train_single_models(LeNet, 4, transform, epochs=1000)
+    train_single_models(LeNet, 8, transform, epochs=1000)
     torch.cuda.empty_cache()
     gc.collect()
 
-    dynamic_ensemble_cifar(4, transform, 4)
+    """dynamic_ensemble_cifar(8, transform, 4)
     torch.cuda.empty_cache()
     gc.collect()
     #generate_random_rgb_image(100000, transform)
@@ -38,4 +38,4 @@ if __name__ == '__main__':
     g_model = train_student()
     torch.cuda.empty_cache()
     gc.collect()
-    evaluate_student(g_model, transform, epochs=1000)
+    evaluate_student(g_model, transform, epochs=1000)"""
