@@ -84,7 +84,7 @@ def dynamic_ensemble_cifar(n, transform, k):
 
     pairs = []
     for inputs, labels in train_loader:
-        for input, labels in zip(inputs, labels):
+        for input, label in zip(inputs, labels):
             pairs.append((input.reshape(input.shape[1] * input.shape[2] * input.shape[3]), label))
     # Create kNN
     samples = [pair[0] for pair in pairs]
