@@ -80,7 +80,10 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             uid = str(uuid.uuid4())[:16]
             np.save(f'{mode}/{uid}.npy', input.detach().cpu().numpy())
             np.save(f'{mode}_label/{uid}.npy', outputs[0].detach().cpu().numpy())
-    print(f'\t- {mode} accuracy: {corrects/len(loader)}')
+    if mode == 'training':
+        print(f'\t- {mode} accuracy: {corrects / (len(loader) * 16)}')
+    else:
+        print(f'\t- {mode} accuracy: {corrects/len(loader)}')
 
 
 def dynamic_ensemble_cifar(n, transform, k):
@@ -101,11 +104,11 @@ def dynamic_ensemble_cifar(n, transform, k):
             pairs.append((input.reshape(input.shape[0] * input.shape[1] * input.shape[2]), label))
     # Create kNN
     samples = [pair[0] for pair in pairs]
-    #knn = NearestNeighbors(n_neighbors=k + 1, algorithm='ball_tree').fit(samples)
-    #with open("knn.pkl", "wb") as f:
-    #    pkl.dump(knn, f)
-    with open("knn.pkl", "rb") as f:
-        knn = pkl.load(f)
+    knn = NearestNeighbors(n_neighbors=k + 1, algorithm='ball_tree').fit(samples)
+    with open("knn.pkl", "wb") as f:
+        pkl.dump(knn, f)
+    #with open("knn.pkl", "rb") as f:
+    #    knn = pkl.load(f)
     print('\n\n\n\n\n\nDYNAMIC ENSEMBLE PERFORMANCE:')
     if not os.path.exists('training'):
         os.mkdir('training')
@@ -114,17 +117,17 @@ def dynamic_ensemble_cifar(n, transform, k):
         os.mkdir('training_label')
         os.mkdir('validation_label')
         os.mkdir('test_label')
-    collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training_1')
+    collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
     del train_loader
-    #gc.collect()
-    #torch.cuda.empty_cache()
-    """_, val_loader, _ = get_CIFAR(transform, batch_size=1)
+    gc.collect()
+    torch.cuda.empty_cache()
+    _, val_loader, _ = get_CIFAR(transform, batch_size=1)
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'validation')
     del val_loader
     gc.collect()
     torch.cuda.empty_cache()
     _, _, test_loader = get_CIFAR(transform, batch_size=1)
-    collect_and_analyze_ensemble_outputs(models, knn, test_loader, k, pairs, 'test')"""
+    collect_and_analyze_ensemble_outputs(models, knn, test_loader, k, pairs, 'test')
     #return pairs
 
 
