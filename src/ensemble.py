@@ -33,13 +33,13 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             j = 0
             while True:
                 if mode == 'training':
-                    tmp_indices = indices[1: k + 1 -j]
+                    tmp_indices = indices[1: k + 1 - j]
                 else:
                     tmp_indices = indices[0: k - j]
                 # create a batch of those sample
                 closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
                 closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
-                print(np.array(closest_pairs_input, dtype=np.float32).shape)
+                #print(np.array(closest_pairs_input, dtype=np.float32).shape)
                 # evaluate models
                 batched_pairs = torch.from_numpy(np.array(closest_pairs_input, dtype=np.float32)).to('cuda')
                 selected_models = []
@@ -56,8 +56,12 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
 
                 if not selected_models:
                     j += 1
-                    if j == k:
+                    if k + 1 - j == 1 and mode == 'training':
                         selected_models.append(models[0])
+                        break
+                    elif k - j == 1 and not mode == 'training':
+                        selected_models.append(models[0])
+                        break
                 else:
                     break
 
