@@ -101,11 +101,11 @@ def dynamic_ensemble_cifar(n, transform, k):
             pairs.append((input.reshape(input.shape[0] * input.shape[1] * input.shape[2]), label))
     # Create kNN
     samples = [pair[0] for pair in pairs]
-    knn = NearestNeighbors(n_neighbors=k + 1, algorithm='ball_tree').fit(samples)
-    with open("knn.pkl", "wb") as f:
-        pkl.dump(knn, f)
-    # with open("knn.pkl", "rb") as f:
-    #  knn = pkl.load(f)
+    #knn = NearestNeighbors(n_neighbors=k + 1, algorithm='ball_tree').fit(samples)
+    #with open("knn.pkl", "wb") as f:
+    #    pkl.dump(knn, f)
+    with open("knn.pkl", "rb") as f:
+        knn = pkl.load(f)
     print('\n\n\n\n\n\nDYNAMIC ENSEMBLE PERFORMANCE:')
     if not os.path.exists('training'):
         os.mkdir('training')
@@ -114,10 +114,10 @@ def dynamic_ensemble_cifar(n, transform, k):
         os.mkdir('training_label')
         os.mkdir('validation_label')
         os.mkdir('test_label')
-    collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
+    #collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
     del train_loader
-    gc.collect()
-    torch.cuda.empty_cache()
+    #gc.collect()
+    #torch.cuda.empty_cache()
     _, val_loader, _ = get_CIFAR(transform, batch_size=1)
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'validation')
     del val_loader
