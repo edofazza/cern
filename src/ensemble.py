@@ -67,7 +67,9 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             _, predicted = torch.max(outputs, 1)
             if predicted.detach().cpu() == label:
                 corrects += 1
-            np.save(f'{mode}/{str(uuid.uuid4())[:16]}.npy', [input.detach().cpu().numpy(), outputs[0].detach().cpu().numpy()], allow_pickle=True)
+            uid = str(uuid.uuid4())[:16]
+            np.save(f'{mode}/{uid}.npy', input.detach().cpu().numpy())
+            np.save(f'{mode}_label/{uid}.npy', outputs[0].detach().cpu().numpy())
     print(f'\t- {mode} accuracy: {corrects/len(loader)}')
 
 
@@ -98,6 +100,9 @@ def dynamic_ensemble_cifar(n, transform, k):
     os.mkdir('training')
     os.mkdir('validation')
     os.mkdir('test')
+    os.mkdir('training_label')
+    os.mkdir('validation_label')
+    os.mkdir('test_label')
     collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
     del train_loader
     gc.collect()
