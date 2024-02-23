@@ -8,7 +8,7 @@ from typing import Callable
 
 def generate_random_rgb_image(n, transform: Callable, width: int = 32, height: int = 32):
     os.mkdir('generated')
-    for _ in n:
+    for _ in range(n):
         # Generate random pixel values for each channel (R, G, B)
         red_channel = np.random.randint(0, 256, size=(height, width), dtype=np.uint8)
         green_channel = np.random.randint(0, 256, size=(height, width), dtype=np.uint8)
