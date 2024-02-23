@@ -15,7 +15,7 @@ from traineval import train, evaluate
 from singletraining import train_single_models
 from ensemble import dynamic_ensemble_cifar
 from generate import generate_random_rgb_image
-from student import train_student, evaluate_student
+from student import train_student, evaluate_student, TransformerConvNet
 
 # https://machinelearningmastery.com/dynamic-ensemble-selection-in-python/
 
@@ -33,7 +33,9 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     gc.collect()"""
 
-    g_model = train_student()
+    """g_model = train_student()
     torch.cuda.empty_cache()
-    gc.collect()
+    gc.collect()"""
+    g_model = TransformerConvNet(3, 256, 10, 4, 2, 3).to('cuda')
+    g_model.load_state_dict(torch.load(f'generator.pt'))
     evaluate_student(g_model, transform, epochs=1000)
