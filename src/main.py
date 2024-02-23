@@ -13,7 +13,7 @@ from lenet import LeNet
 from dataset import get_CIFAR
 from traineval import train, evaluate
 from singletraining import train_single_models
-from ensemble import dynamic_ensemble_cifar
+from ensemble import dynamic_ensemble_cifar, generated_trained_samples
 from generate import generate_random_rgb_image
 from student import train_student, evaluate_student, TransformerConvNet
 
@@ -29,9 +29,9 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     gc.collect()"""
 
-    dynamic_ensemble_cifar(8, transform, 4)
+    """dynamic_ensemble_cifar(8, transform, 4)
     torch.cuda.empty_cache()
-    gc.collect()
+    gc.collect()"""
 
     """g_model = train_student()
     torch.cuda.empty_cache()
@@ -39,4 +39,5 @@ if __name__ == '__main__':
     """g_model = TransformerConvNet(3, 256, 10, 4, 2, 3).to('cuda')
     g_model.load_state_dict(torch.load(f'generator.pt'))
     evaluate_student(g_model, transform, epochs=1000)"""
-    #generate_random_rgb_image(100000, transform)
+    generate_random_rgb_image(100000, transform)
+    generated_trained_samples(transform, 8, 4)

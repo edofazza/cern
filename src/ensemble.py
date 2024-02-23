@@ -32,7 +32,7 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             indices = knn.kneighbors(input_numpy, return_distance=False)[0]
             j = 0
             while True:
-                if mode == 'training_1':
+                if mode == 'training':
                     tmp_indices = indices[1: k + 1 - j]
                 else:
                     tmp_indices = indices[0: k - j]
@@ -56,10 +56,10 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
 
                 if not selected_models:
                     j += 1
-                    if k + 1 - j == 1 and mode == 'training_1':
+                    if k + 1 - j == 1 and mode == 'training':
                         selected_models.append(models[0])
                         break
-                    elif k - j == 1 and not mode == 'training_1':
+                    elif k - j == 1 and not mode == 'training':
                         selected_models.append(models[0])
                         break
                 else:
@@ -77,9 +77,9 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
 
             if predicted.detach().cpu() == label:
                 corrects += 1
-            #uid = str(uuid.uuid4())[:16]
-            #np.save(f'{mode}/{uid}.npy', input.detach().cpu().numpy())
-            #np.save(f'{mode}_label/{uid}.npy', outputs[0].detach().cpu().numpy())
+            uid = str(uuid.uuid4())[:16]
+            np.save(f'{mode}/{uid}.npy', input.detach().cpu().numpy())
+            np.save(f'{mode}_label/{uid}.npy', outputs[0].detach().cpu().numpy())
     print(f'\t- {mode} accuracy: {corrects/len(loader)}')
 
 
