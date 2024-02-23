@@ -17,6 +17,6 @@ def generate_random_rgb_image(n, transform: Callable, width: int = 32, height: i
         # Stack the channels to form the RGB image
         rgb_image = np.stack([red_channel, green_channel, blue_channel], axis=-1)
         print(rgb_image.transpose(2, 0, 1).shape)
-        rgb_image = rgb_image.transpose(2, 0, 1
+        rgb_image = rgb_image.transpose(2, 0, 1)
         transform_image = transform(rgb_image.transpose(2, 0, 1))
         np.save(f'generated/{str(uuid.uuid4())[:16]}.npy', transform_image.numpy())
