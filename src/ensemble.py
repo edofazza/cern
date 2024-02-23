@@ -102,7 +102,7 @@ def dynamic_ensemble_cifar(n, transform, k):
     # with open("knn.pkl", "rb") as f:
     #  knn = pkl.load(f)
     print('\n\n\n\n\n\nDYNAMIC ENSEMBLE PERFORMANCE:')
-    if os.path.exists('training'):
+    if not os.path.exists('training'):
         os.mkdir('training')
         os.mkdir('validation')
         os.mkdir('test')
