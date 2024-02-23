@@ -159,7 +159,7 @@ def generated_trained_samples(transform, n, k):
 
         j = 0
         while True:
-            tmp_indices = indices[0:-j]
+            tmp_indices = indices[0: k - j]
             # create a batch of those sample
             closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
             closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
@@ -179,7 +179,7 @@ def generated_trained_samples(transform, n, k):
 
             if not selected_models:
                 j += 1
-                if j == k:
+                if k - j == 1:
                     selected_models.append(models[0])
             else:
                 break
