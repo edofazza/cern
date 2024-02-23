@@ -115,6 +115,7 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
         val_loss = 0.0
         with torch.no_grad():
             for inputs, labels in val_loader:
+                inputs, labels = inputs.to('cuda'), labels.to('cuda')
                 outputs = model(inputs)
                 val_loss += criterion(outputs, labels).item()
 
