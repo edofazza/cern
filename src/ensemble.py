@@ -65,6 +65,11 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             # classify with the ensemble
             outputs = ensemble(input.to('cuda'))
             _, predicted = torch.max(outputs, 1)
+
+            del ensemble
+            gc.collect()
+            torch.cuda.empty_cache()
+
             if predicted.detach().cpu() == label:
                 corrects += 1
             uid = str(uuid.uuid4())[:16]
