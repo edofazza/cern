@@ -148,5 +148,5 @@ def evaluate_student(g_model: nn.Module, transform: Callable,
     train_loader, val_loader, test_loader = get_CIFAR(transform, batch_size, train_val_split)
     criterion = nn.CrossEntropyLoss()
     evaluate([g_model], train_loader, criterion, 0, 0, 'Training', device)
-    evaluate([g_model], train_loader, criterion, 0, 0, 'Val', device)
-    evaluate([g_model], train_loader, criterion, 0, 0, 'Test', device)
+    evaluate([g_model], val_loader, criterion, 0, 0, 'Val', device)
+    evaluate([g_model], test_loader, criterion, 0, 0, 'Test', device)
