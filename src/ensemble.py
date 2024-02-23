@@ -72,7 +72,7 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
 
 def dynamic_ensemble_cifar(n, transform, k):
     # get CIFAR test
-    train_loader, _, _ = get_CIFAR(transform, batch_size=1)
+    train_loader, _, _ = get_CIFAR(transform, batch_size=16)
     gc.collect()
 
     # get models
@@ -83,8 +83,9 @@ def dynamic_ensemble_cifar(n, transform, k):
         models.append(model)
 
     pairs = []
-    for input, label in train_loader:
-        pairs.append((input.reshape(input.shape[1] * input.shape[2] * input.shape[3]), label))
+    for inputs, labels in train_loader:
+        for input, labels in zip(inputs, labels):
+            pairs.append((input.reshape(input.shape[1] * input.shape[2] * input.shape[3]), label))
     # Create kNN
     samples = [pair[0] for pair in pairs]
     knn = NearestNeighbors(n_neighbors=k + 1, algorithm='ball_tree').fit(samples)
