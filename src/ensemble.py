@@ -33,9 +33,9 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             j = 0
             while True:
                 if mode == 'training':
-                    tmp_indices = indices[1:-j]
+                    tmp_indices = indices[1: k + 1 -j]
                 else:
-                    tmp_indices = indices[0:-j]
+                    tmp_indices = indices[0: k - j]
                 # create a batch of those sample
                 closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
                 closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
