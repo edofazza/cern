@@ -37,9 +37,9 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
                 else:
                     tmp_indices = indices[0: k - j]
                 # create a batch of those sample
-                print(pairs[0].shape)
                 closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
                 closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
+                print(np.array(closest_pairs_input, dtype=np.float32).shape)
                 # evaluate models
                 batched_pairs = torch.from_numpy(np.array(closest_pairs_input, dtype=np.float32)).to('cuda')
                 selected_models = []
