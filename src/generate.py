@@ -16,7 +16,7 @@ def generate_random_rgb_image(n, transform: Callable, width: int = 32, height: i
 
         # Stack the channels to form the RGB image
         rgb_image = np.stack([red_channel, green_channel, blue_channel], axis=-1)
-        torch_rgb_image = torch.from_numpy(rgb_image.transpose(2, 0, 1)).float()
+        torch_rgb_image = torch.from_numpy(rgb_image.transpose(2, 0, 1))
         transform_image = transform(torch_rgb_image)
         np.save(f'generated/{str(uuid.uuid4())[:16]}.npy', transform_image.numpy())
 
