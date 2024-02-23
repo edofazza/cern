@@ -153,8 +153,8 @@ def generated_trained_samples(transform, n, k):
 
     samples_path = [s_path for s_path in os.listdir('generated') if s_path.endswith('.npy')]
     for sample in samples_path:
-        sample = np.load(f'generated/{sample}')
-        flatted_sample = sample.reshape(1, sample.shape[0] * sample.shape[1] * sample.shape[2])
+        sample_np = np.load(f'generated/{sample}')
+        flatted_sample = sample_np.reshape(1, sample_np.shape[0] * sample_np.shape[1] * sample_np.shape[2])
         indices = knn.kneighbors(flatted_sample, return_distance=False)[0]
 
         j = 0
@@ -187,6 +187,6 @@ def generated_trained_samples(transform, n, k):
         # create ensemble
         ensemble = EnsembleModel(selected_models).to('cuda')
         # classify with the ensemble
-        outputs = ensemble(torch.from_numpy(sample).to('cuda'))
+        outputs = ensemble(torch.from_numpy(sample_np).to('cuda'))
         np.save(f'generated_label/{sample}', outputs[0].detach().cpu().numpy())
 
