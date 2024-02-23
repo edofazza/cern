@@ -57,11 +57,13 @@ class CustomDataset(Dataset):
 
     def load_samples(self):
         samples = []
-        files = os.listdir(self.directory)
+        files = [f for f in os.listdir(self.directory) if f.endswith('.npy')]
         for file in files:
             filepath = os.path.join(self.directory, file)
             data = np.load(filepath, allow_pickle=True)
-            samples.append(data)
+            filepath = os.path.join(self.directory + '_label', file)
+            label = np.load(filepath, allow_pickle=True)
+            samples.append((data, label))
         return samples
 
     def __len__(self):
@@ -80,15 +82,15 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
     print('\n\n\n\n\n\n\nTRAINING G NETWORK')
     model = TransformerConvNet(input_dim, hidden_dim, output_dim, num_heads, num_layers, kernel_size).to('cuda')
 
-    training_directory = 'training'
-    validation_directory = 'validation'
+    training_directory = 'training_and_generated'
+    validation_directory = 'validation_and_generated'
 
     # Create datasets and data loaders
     train_dataset = CustomDataset(training_directory)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=4)
 
     val_dataset = CustomDataset(validation_directory)
-    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=4)
+    val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=4)
 
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)

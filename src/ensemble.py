@@ -128,7 +128,16 @@ def dynamic_ensemble_cifar(n, transform, k):
     #return pairs
 
 
-"""def generated_trained_samples(pairs, n, k):
+def generated_trained_samples(transform, n, k):
+    train_loader, _, _ = get_CIFAR(transform, batch_size=16)
+    gc.collect()
+
+    pairs = []
+    for inputs, labels in train_loader:
+        for input, label in zip(inputs, labels):
+            pairs.append((input.reshape(input.shape[0] * input.shape[1] * input.shape[2]), label))
+
+    os.mkdir('generated_label')
     with open("knn.pkl", "rb") as f:
         knn = pkl.load(f)
 
@@ -176,6 +185,5 @@ def dynamic_ensemble_cifar(n, transform, k):
         ensemble = EnsembleModel(selected_models).to('cuda')
         # classify with the ensemble
         outputs = ensemble(torch.from_numpy(sample).reshape(-1).to('cuda'))
-        np.save(f'training/{str(uuid.uuid4())[:16]}.npy',
-                [sample, outputs[0].detach().cpu().numpy()])"""
+        np.save(f'generated_label/{sample}', outputs[0].detach().cpu().numpy())
 
