@@ -26,7 +26,7 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
     corrects = 0
     for inputs, labels in loader:
         for input, label in zip(inputs, labels):
-            input_numpy = input[0].numpy()
+            input_numpy = input.numpy()
             input_numpy = input_numpy.reshape(1, input_numpy.shape[0] * input_numpy.shape[1] * input_numpy.shape[2])
             # select kNN of input
             indices = knn.kneighbors(input_numpy, return_distance=False)[0]
