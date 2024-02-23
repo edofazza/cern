@@ -36,12 +36,13 @@ def train_single_models(f_model: Type[nn.Module], n: int, transform: Callable,
         # Early stopping
         if best_overall_average_loss < overall_average_loss:
             early_stopping_counter += 1
-            if early_stopping_counter > 5:
-                print('EARLY STOPPING, 5 epochs without improving')
+            if early_stopping_counter > 20:
+                print('EARLY STOPPING, 20 epochs without improving')
                 break
         else:
             best_overall_average_loss = overall_average_loss
             best_models = models.copy()
+            print('MODELS SAVED')
 
     # Save models
     for i, model in enumerate(best_models):

@@ -124,8 +124,8 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
             best_model_dict = model.state_dict().copy()
         else:
             early_stopping_counter += 1
-            if early_stopping_counter > 5:
-                print('EARLY STOPPING, 5 epochs without improving')
+            if early_stopping_counter > 20:
+                print('EARLY STOPPING, 20 epochs without improving')
                 break
 
     torch.save(best_model_dict, f'generator.pt')
