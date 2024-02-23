@@ -29,11 +29,11 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     gc.collect()"""
 
-    dynamic_ensemble_cifar(8, transform, 4)
+    """dynamic_ensemble_cifar(8, transform, 4)
     torch.cuda.empty_cache()
-    gc.collect()
+    gc.collect()"""
 
-    """g_model = train_student()
+    g_model = train_student()
     torch.cuda.empty_cache()
     gc.collect()
-    evaluate_student(g_model, transform, epochs=1000)"""
+    evaluate_student(g_model, transform, epochs=1000)
