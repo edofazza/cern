@@ -6,6 +6,7 @@ import numpy as np
 import pickle as pkl
 import uuid
 import os
+import gc
 
 from dataset import get_CIFAR
 from lenet import LeNet
@@ -71,7 +72,9 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
 
 def dynamic_ensemble_cifar(n, transform, k):
     # get CIFAR test
-    train_loader, val_loader, test_loader = get_CIFAR(transform, batch_size=1)
+    train_loader, _, _ = get_CIFAR(transform, batch_size=1)
+    gc.collect()
+
     # get models
     models = list()
     for i in range(n):
@@ -94,8 +97,16 @@ def dynamic_ensemble_cifar(n, transform, k):
     os.mkdir('validation')
     os.mkdir('test')
     collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
+    del train_loader
+    gc.collect()
+    torch.cuda.empty_cache()
+    _, val_loader, _ = get_CIFAR(transform, batch_size=1)
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'validation')
-    collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'test')
+    del val_loader
+    gc.collect()
+    torch.cuda.empty_cache()
+    _, _, test_loader = get_CIFAR(transform, batch_size=1)
+    collect_and_analyze_ensemble_outputs(models, knn, test_loader, k, pairs, 'test')
     #return pairs
 
 
