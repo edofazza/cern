@@ -82,8 +82,8 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
     print('\n\n\n\n\n\n\nTRAINING G NETWORK')
     model = TransformerConvNet(input_dim, hidden_dim, output_dim, num_heads, num_layers, kernel_size).to('cuda')
 
-    training_directory = 'training_and_generated'
-    validation_directory = 'validation_and_generated'
+    training_directory = 'training'
+    validation_directory = 'validation'
 
     # Create datasets and data loaders
     train_dataset = CustomDataset(training_directory)
