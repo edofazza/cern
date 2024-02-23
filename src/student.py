@@ -119,7 +119,8 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
                 val_loss += criterion(outputs, labels).item()
 
         average_val_loss = val_loss / len(val_loader)
-        print(f"Epoch {epoch + 1}/{epochs}, Training Loss: {average_train_loss}, Validation Loss: {average_val_loss:.4f}")
+        print(
+            f"Epoch {epoch + 1}/{epochs}, Training Loss: {average_train_loss}, Validation Loss: {average_val_loss:.4f}")
 
         if best_average_val_loss > average_val_loss:
             best_average_val_loss = average_val_loss
@@ -136,8 +137,8 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
 
 
 def evaluate_student(g_model: nn.Module, transform: Callable,
-         batch_size: int = 256, learning_rate: float = 0.001, epochs: int = 10,
-         train_val_split: float = 0.8, device: str = 'cuda') -> None:
+                     batch_size: int = 256, learning_rate: float = 0.001, epochs: int = 10,
+                     train_val_split: float = 0.8, device: str = 'cuda') -> None:
     assert 0.0 < train_val_split < 1.0
     assert epochs > 0
     assert learning_rate > 0
