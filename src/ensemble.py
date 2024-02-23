@@ -32,7 +32,7 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             indices = knn.kneighbors(input_numpy, return_distance=False)[0]
             j = 0
             while True:
-                if mode == 'training':
+                if mode == 'training_1':
                     tmp_indices = indices[1: k + 1 - j]
                 else:
                     tmp_indices = indices[0: k - j]
@@ -56,10 +56,10 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
 
                 if not selected_models:
                     j += 1
-                    if k + 1 - j == 1 and mode == 'training':
+                    if k + 1 - j == 1 and mode == 'training_1':
                         selected_models.append(models[0])
                         break
-                    elif k - j == 1 and not mode == 'training':
+                    elif k - j == 1 and not mode == 'training_1':
                         selected_models.append(models[0])
                         break
                 else:
@@ -77,9 +77,9 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
 
             if predicted.detach().cpu() == label:
                 corrects += 1
-            uid = str(uuid.uuid4())[:16]
-            np.save(f'{mode}/{uid}.npy', input.detach().cpu().numpy())
-            np.save(f'{mode}_label/{uid}.npy', outputs[0].detach().cpu().numpy())
+            #uid = str(uuid.uuid4())[:16]
+            #np.save(f'{mode}/{uid}.npy', input.detach().cpu().numpy())
+            #np.save(f'{mode}_label/{uid}.npy', outputs[0].detach().cpu().numpy())
     print(f'\t- {mode} accuracy: {corrects/len(loader)}')
 
 
@@ -114,17 +114,17 @@ def dynamic_ensemble_cifar(n, transform, k):
         os.mkdir('training_label')
         os.mkdir('validation_label')
         os.mkdir('test_label')
-    #collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training')
+    collect_and_analyze_ensemble_outputs(models, knn, train_loader, k, pairs, 'training_1')
     del train_loader
     #gc.collect()
     #torch.cuda.empty_cache()
-    _, val_loader, _ = get_CIFAR(transform, batch_size=1)
+    """_, val_loader, _ = get_CIFAR(transform, batch_size=1)
     collect_and_analyze_ensemble_outputs(models, knn, val_loader, k, pairs, 'validation')
     del val_loader
     gc.collect()
     torch.cuda.empty_cache()
     _, _, test_loader = get_CIFAR(transform, batch_size=1)
-    collect_and_analyze_ensemble_outputs(models, knn, test_loader, k, pairs, 'test')
+    collect_and_analyze_ensemble_outputs(models, knn, test_loader, k, pairs, 'test')"""
     #return pairs
 
 

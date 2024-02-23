@@ -29,13 +29,14 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     gc.collect()"""
 
-    """dynamic_ensemble_cifar(8, transform, 4)
+    dynamic_ensemble_cifar(8, transform, 4)
     torch.cuda.empty_cache()
-    gc.collect()"""
+    gc.collect()
 
     """g_model = train_student()
     torch.cuda.empty_cache()
     gc.collect()"""
-    g_model = TransformerConvNet(3, 256, 10, 4, 2, 3).to('cuda')
+    """g_model = TransformerConvNet(3, 256, 10, 4, 2, 3).to('cuda')
     g_model.load_state_dict(torch.load(f'generator.pt'))
-    evaluate_student(g_model, transform, epochs=1000)
+    evaluate_student(g_model, transform, epochs=1000)"""
+    #generate_random_rgb_image(100000, transform)
