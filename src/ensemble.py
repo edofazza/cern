@@ -64,6 +64,8 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             ensemble = EnsembleModel(selected_models).to('cuda')
             # classify with the ensemble
             outputs = ensemble(input.to('cuda'))
+            print(input)
+            print(outputs)
             _, predicted = torch.max(outputs, 1)
             if predicted.detach().cpu() == label:
                 corrects += 1
