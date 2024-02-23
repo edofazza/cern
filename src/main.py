@@ -39,5 +39,5 @@ if __name__ == '__main__':
     """g_model = TransformerConvNet(3, 256, 10, 4, 2, 3).to('cuda')
     g_model.load_state_dict(torch.load(f'generator.pt'))
     evaluate_student(g_model, transform, epochs=1000)"""
-    generate_random_rgb_image(50000, transform)
+    #generate_random_rgb_image(50000, transform)
     generated_trained_samples(transform, 8, 4)

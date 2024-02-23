@@ -4,7 +4,7 @@ import numpy as np
 import uuid
 import torch
 from typing import Callable
-from PIL import Image
+
 
 def generate_random_rgb_image(n, transform: Callable, width: int = 32, height: int = 32):
     os.mkdir('generated')
