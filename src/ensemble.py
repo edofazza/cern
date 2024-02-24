@@ -39,7 +39,6 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
                 # create a batch of those sample
                 closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
                 closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
-                #print(np.array(closest_pairs_input, dtype=np.float32).shape)
                 # evaluate models
                 batched_pairs = torch.from_numpy(np.array(closest_pairs_input, dtype=np.float32)).to('cuda')
                 selected_models = []
@@ -81,7 +80,7 @@ def collect_and_analyze_ensemble_outputs(models, knn, loader, k, pairs, mode='tr
             np.save(f'{mode}/{uid}.npy', input.detach().cpu().numpy())
             np.save(f'{mode}_label/{uid}.npy', outputs[0].detach().cpu().numpy())
     if mode == 'training':
-        print(f'\t- {mode} accuracy: {corrects / (len(loader) * 16)}')
+        print(f'\t- {mode} accuracy: {corrects / (len(loader) * 16)}')  # 16 is the batch size
     else:
         print(f'\t- {mode} accuracy: {corrects/len(loader)}')
 

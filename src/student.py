@@ -82,7 +82,7 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
     print('\n\n\n\n\n\n\nTRAINING G NETWORK')
     model = TransformerConvNet(input_dim, hidden_dim, output_dim, num_heads, num_layers, kernel_size).to('cuda')
 
-    training_directory = 'training'
+    training_directory = 'enhanceed_training'
     validation_directory = 'validation'
 
     # Create datasets and data loaders
@@ -132,7 +132,7 @@ def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 1
                 print('EARLY STOPPING, 20 epochs without improving')
                 break
 
-    torch.save(best_model_dict, f'generator.pt')
+    torch.save(best_model_dict, f'generator_enhanced.pt')
     model.load_state_dict(best_model_dict)
     return model
 

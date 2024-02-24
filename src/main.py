@@ -40,4 +40,9 @@ if __name__ == '__main__':
     g_model.load_state_dict(torch.load(f'generator.pt'))
     evaluate_student(g_model, transform, epochs=1000)"""
     #generate_random_rgb_image(50000, transform)
-    generated_trained_samples(transform, 8, 4)
+    #generated_trained_samples(transform, 8, 4)
+    g_model = train_student()
+    torch.cuda.empty_cache()
+    gc.collect()
+    g_model = g_model.to('cuda')
+    evaluate_student(g_model, transform, epochs=1000)
