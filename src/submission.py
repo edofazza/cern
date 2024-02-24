@@ -559,6 +559,7 @@ if __name__ == '__main__':
     gc.collect()
 
     torch.manual_seed(42)
+    print('\n\n\n\n\n\nTRAINING G NETWORK')
     g_model = train_student()
     torch.cuda.empty_cache()
     gc.collect()
@@ -576,6 +577,7 @@ if __name__ == '__main__':
     os.system('find generated_label/ -type f -print0 | xargs -0 cp -t enhanced_training_label/')
     # train g model on new directory and evaluate on CIFAR10
     torch.manual_seed(42)
+    print('\n\n\n\n\n\nTRAINING G NETWORK')
     g_model = train_student(training_directory='enhanced_training')
     torch.cuda.empty_cache()
     gc.collect()
