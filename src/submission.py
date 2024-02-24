@@ -377,3 +377,207 @@ def generate_random_rgb_image(n, transform: Callable, width: int = 32, height: i
         numpy_array = np.array(transformed_img)
         np.save(f'generated/{str(uuid.uuid4())[:16]}.npy', numpy_array)
 
+
+def generated_trained_samples(transform, n, k):
+    train_loader, _, _ = get_CIFAR(transform, batch_size=16)
+    gc.collect()
+
+    pairs = []
+    for inputs, labels in train_loader:
+        for input, label in zip(inputs, labels):
+            pairs.append((input.reshape(input.shape[0] * input.shape[1] * input.shape[2]), label))
+
+    os.mkdir('generated_label')
+    with open("knn.pkl", "rb") as f:
+        knn = pkl.load(f)
+
+    # get models
+    models = list()
+    for i in range(n):
+        model = LeNet()
+        model.load_state_dict(torch.load(f'model_{i}.pt'))
+        models.append(model)
+
+    samples_path = [s_path for s_path in os.listdir('generated') if s_path.endswith('.npy')]
+    for sample in samples_path:
+        sample_np = np.load(f'generated/{sample}')
+        flatted_sample = sample_np.reshape(1, sample_np.shape[0] * sample_np.shape[1] * sample_np.shape[2])
+        indices = knn.kneighbors(flatted_sample, return_distance=False)[0]
+
+        j = 0
+        while True:
+            tmp_indices = indices[0: k - j]
+            # create a batch of those sample
+            closest_pairs_input = [pairs[idx][0].reshape(3, 32, 32) for idx in tmp_indices]
+            closest_pairs_label = [pairs[idx][1] for idx in tmp_indices]
+            # evaluate models
+            batched_pairs = torch.from_numpy(np.array(closest_pairs_input, dtype=np.float32)).to('cuda')
+            selected_models = []
+            for model in models:
+                model = model.to('cuda')
+                model.eval()
+                outputs = model(batched_pairs)
+                _, predicted = torch.max(outputs, 1)
+                closest_pairs_label = torch.from_numpy(np.array(closest_pairs_label).reshape(len(closest_pairs_label)))
+                total_correct = (predicted.detach().cpu() == closest_pairs_label).sum().item()
+                # select only the models that can classify correctly all kNN
+                if total_correct == len(closest_pairs_input):
+                    selected_models.append(model)
+
+            if not selected_models:
+                j += 1
+                if k - j == 1:
+                    selected_models.append(models[0])
+            else:
+                break
+
+        # create ensemble
+        ensemble = EnsembleModel(selected_models).to('cuda')
+        # classify with the ensemble
+        outputs = ensemble(torch.from_numpy(sample_np).to('cuda'))
+        np.save(f'generated_label/{sample}', outputs[0].detach().cpu().numpy())
+
+
+"""
+    G MODEL TRAINING AND EVALUATION FUNCTIONS
+"""
+class CustomDataset(Dataset):
+    def __init__(self, directory):
+        self.directory = directory
+        self.samples = self.load_samples()
+
+    def load_samples(self):
+        samples = []
+        files = [f for f in os.listdir(self.directory) if f.endswith('.npy')]
+        for file in files:
+            filepath = os.path.join(self.directory, file)
+            data = np.load(filepath, allow_pickle=True)
+            filepath = os.path.join(self.directory + '_label', file)
+            label = np.load(filepath, allow_pickle=True)
+            samples.append((data, label))
+        return samples
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        sample = self.samples[idx]
+        input_data = torch.tensor(sample[0], dtype=torch.float32)
+        label = torch.tensor(sample[1], dtype=torch.float32)
+        return input_data, label
+
+
+def train_student(input_dim: int = 3, hidden_dim: int = 256, output_dim: int = 10,
+                  num_heads: int = 4, num_layers: int = 2, kernel_size: int = 3,
+                  epochs: int = 1000, training_directory: str = 'training'):
+    print('\n\n\n\n\n\n\nTRAINING G NETWORK')
+    model = TransformerConvNet(input_dim, hidden_dim, output_dim, num_heads, num_layers, kernel_size).to('cuda')
+
+    validation_directory = 'validation'
+
+    # Create datasets and data loaders
+    train_dataset = CustomDataset(training_directory)
+    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=4)
+
+    val_dataset = CustomDataset(validation_directory)
+    val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=4)
+
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    best_average_val_loss = 1000000
+    early_stopping_counter = 0
+    best_model_dict = model.state_dict().copy()
+    for epoch in range(epochs):
+        model.train()
+        train_loss = 0.0
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to('cuda'), labels.to('cuda')
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item()
+        average_train_loss = train_loss / len(train_loader)
+
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to('cuda'), labels.to('cuda')
+                outputs = model(inputs)
+                val_loss += criterion(outputs, labels).item()
+
+        average_val_loss = val_loss / len(val_loader)
+        print(
+            f"Epoch {epoch + 1}/{epochs}, Training Loss: {average_train_loss}, Validation Loss: {average_val_loss:.4f}")
+
+        if best_average_val_loss > average_val_loss:
+            best_average_val_loss = average_val_loss
+            best_model_dict = model.state_dict().copy()
+        else:
+            early_stopping_counter += 1
+            if early_stopping_counter > 20:
+                print('EARLY STOPPING, 20 epochs without improving')
+                break
+
+    torch.save(best_model_dict, f'generator_enhanced.pt')
+    model.load_state_dict(best_model_dict)
+    return model
+
+
+def evaluate_student(g_model: nn.Module, transform: Callable,
+                     batch_size: int = 256, learning_rate: float = 0.001, epochs: int = 10,
+                     train_val_split: float = 0.8, device: str = 'cuda') -> None:
+    assert 0.0 < train_val_split < 1.0
+    assert epochs > 0
+    assert learning_rate > 0
+    assert batch_size > 0
+    print('\n\n\n\n\n\n\nG NETWORK RESULTS:')
+    train_loader, val_loader, test_loader = get_CIFAR(transform, batch_size, train_val_split)
+    criterion = nn.CrossEntropyLoss()
+    evaluate([g_model], train_loader, criterion, 0, 0, 'Training', device)
+    evaluate([g_model], val_loader, criterion, 0, 0, 'Val', device)
+    evaluate([g_model], test_loader, criterion, 0, 0, 'Test', device)
+
+
+
+
+if __name__ == '__main__':
+    torch.manual_seed(42)
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    train_single_models(LeNet, 8, transform, epochs=1000)
+    torch.cuda.empty_cache()
+    gc.collect()
+
+    dynamic_ensemble_cifar(8, transform, 4)
+    torch.cuda.empty_cache()
+    gc.collect()
+
+    torch.manual_seed(42)
+    g_model = train_student()
+    torch.cuda.empty_cache()
+    gc.collect()
+    evaluate_student(g_model, transform, epochs=1000)
+
+    generate_random_rgb_image(50000, transform)
+    print('\n\n\n\nGENERATED 50000 RANDOM IMAGES')
+    generated_trained_samples(transform, 8, 4)
+    # create new training directory
+    os.mkdir('enhanced_training')
+    os.mkdir('enhanced_training_label')
+    os.system('cp training/* enhanced_training')
+    os.system('cp training_label/* enhanced_training_label')
+    os.system('find generated/ -type f -print0 | xargs -0 cp -t enhanced_training/')
+    os.system('find generated_label/ -type f -print0 | xargs -0 cp -t enhanced_training_label/')
+    # train g model on new directory and evaluate on CIFAR10
+    torch.manual_seed(42)
+    g_model = train_student(training_directory='enhanced_training')
+    torch.cuda.empty_cache()
+    gc.collect()
+    g_model = g_model.to('cuda')
+    evaluate_student(g_model, transform, epochs=1000)
