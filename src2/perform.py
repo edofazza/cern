@@ -83,10 +83,10 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
                         break
                 else:
                     break
-            ensemble = EnsembleModel(selected_models).to('cuda')
-            outputs = ensemble(input.to('cuda'))
+            ensemble = EnsembleModel(selected_models).to(device)
+            outputs = ensemble(input.to(device))
             _, predicted = torch.max(outputs, 1)
-            losses.append(criterion_G(predicted, label))
+            losses.append(criterion_G(predicted, label.to(device)))
 
             if predicted.detach().cpu() == label:
                 corrects += 1
