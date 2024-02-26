@@ -92,7 +92,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
             print(predicted.shape)
             #print(predicted)
             #print(label.to(device))
-            losses.append(criterion_G(predicted, torch.tensor([label.item()], device='cuda')))
+            losses.append(criterion_G(predicted, torch.tensor([label.item()], dtype=torch.float32, device='cuda')))
 
             if predicted.detach() == label:
                 corrects += 1
