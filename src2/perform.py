@@ -87,7 +87,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
             outputs = ensemble(input.to(device))
             print(outputs.shape)
             outputs_list.append(outputs)
-            _, predicted = torch.nn.functional.softmax(outputs)
+            _, predicted = torch.max(outputs, 1)
             print(predicted)
             print(predicted.shape)
             #print(predicted)
