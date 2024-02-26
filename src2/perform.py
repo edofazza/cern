@@ -95,7 +95,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
                 corrects += 1
 
         # TODO: from outputs list get tensor for computing the loss
-        tensor_outputs = torch.tensor([t.detach().numpy() for t in outputs_list], device='cuda:0')
+        tensor_outputs = torch.tensor([t.detach().cpu().numpy() for t in outputs_list], device='cuda:0')
         ensemble_loss = criterion_G(tensor_outputs, labels)
         # Get loss from dynamic ensemble
         #ensemble_loss = torch.mean(torch.tensor(losses))
