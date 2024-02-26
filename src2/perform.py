@@ -48,7 +48,6 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
             indices = knn.kneighbors(input_numpy, return_distance=False)[0]
 
             j = 0
-            selected_models = []
             while True:
                 selected_models = []
                 if mode == 'training':
@@ -88,7 +87,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
             _, predicted = torch.max(outputs, 1)
             print(predicted)
             print(label.to(device))
-            losses.append(criterion_G(predicted, label.to(device)))
+            losses.append(criterion_G(predicted, torch.tensor([label.item()], device='cuda')))
 
             if predicted.detach().cpu() == label:
                 corrects += 1
