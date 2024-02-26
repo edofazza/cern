@@ -5,7 +5,7 @@ class Generator(nn.Module):
     def __init__(self, input_size, output_size, num_classifiers, transformer_hidden_size=256, num_transformer_layers=2):
         super(Generator, self).__init__()
         self.output_size = output_size
-        self.num_classifier = num_classifiers
+        self.num_classifiers = num_classifiers
         self.fc = nn.Linear(input_size, transformer_hidden_size)
         self.transformer = nn.Transformer(
             d_model=transformer_hidden_size,
