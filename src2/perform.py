@@ -86,6 +86,8 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
             ensemble = EnsembleModel(selected_models).to(device)
             outputs = ensemble(input.to(device))
             _, predicted = torch.max(outputs, 1)
+            print(predicted)
+            print(label.to(device)
             losses.append(criterion_G(predicted, label.to(device)))
 
             if predicted.detach().cpu() == label:
