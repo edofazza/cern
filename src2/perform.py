@@ -42,6 +42,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
 
         # Perform dynamic ensemble
         losses = []
+        outputs_list = list()
         for input, label in zip(inputs, labels):
             input_numpy = input.detach().cpu().numpy()
             input_numpy = input_numpy.reshape(1, input_numpy.shape[0] * input_numpy.shape[1] * input_numpy.shape[2])
@@ -84,16 +85,20 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
                     break
             ensemble = EnsembleModel(selected_models).to(device)
             outputs = ensemble(input.to(device))
+            outputs_list.append(outputs)
             _, predicted = torch.max(outputs, 1)
-            print(predicted)
-            print(label.to(device))
-            losses.append(criterion_G(predicted, torch.tensor([label.item()], device='cuda')))
+            #print(predicted)
+            #print(label.to(device))
+            #losses.append(criterion_G(predicted, torch.tensor([label.item()], device='cuda')))
 
             if predicted.detach().cpu() == label:
                 corrects += 1
 
+        # TODO: from outputs list get tensor for computing the loss
+        tensor_outputs = torch.tensor(outputs_list, device='cuda:0')
+        ensemble_loss = criterion_G(tensor_outputs, labels)
         # Get loss from dynamic ensemble
-        ensemble_loss = torch.mean(torch.tensor(losses))
+        #ensemble_loss = torch.mean(torch.tensor(losses))
         # Add loss to total loss
         total_loss.append(ensemble_loss.item())
         # optimize
