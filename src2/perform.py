@@ -86,23 +86,25 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
             ensemble = EnsembleModel(selected_models).to(device)
             outputs = ensemble(input.to(device))
             outputs_list.append(outputs)
-            _, predicted = torch.max(outputs, 1)
+            _, predicted = torch.nn.functional.softmax(outputs, 1)
+            print(predicted)
+            print(predicted.shape)
             #print(predicted)
             #print(label.to(device))
-            #losses.append(criterion_G(predicted, torch.tensor([label.item()], device='cuda')))
+            losses.append(criterion_G(predicted, torch.tensor([label.item()], device='cuda')))
 
             if predicted.detach() == label:
                 corrects += 1
 
         # TODO: from outputs list get tensor for computing the loss
-        print('TENSOR OUTPUT')
-        tensor_outputs = torch.tensor([t.clone().detach().cpu().numpy() for t in outputs_list], device='cuda:0')
-        print(tensor_outputs.reshape(tensor_outputs.size(0), tensor_outputs.size(2)).size())
-        tensor_outputs = torch.nn.functional.softmax(tensor_outputs.reshape(tensor_outputs.size(0), tensor_outputs.size(2)), dim=1)
-        print(tensor_outputs.shape)
-        ensemble_loss = criterion_G(tensor_outputs, labels)
+        #print('TENSOR OUTPUT')
+        #tensor_outputs = torch.tensor([t.clone().detach().cpu().numpy() for t in outputs_list], device='cuda:0')
+        #print(tensor_outputs.reshape(tensor_outputs.size(0), tensor_outputs.size(2)).size())
+        #tensor_outputs = torch.nn.functional.softmax(tensor_outputs.reshape(tensor_outputs.size(0), tensor_outputs.size(2)), dim=1)
+        #print(tensor_outputs.shape)
+        #ensemble_loss = criterion_G(tensor_outputs, labels)
         # Get loss from dynamic ensemble
-        #ensemble_loss = torch.mean(torch.tensor(losses))
+        ensemble_loss = torch.mean(torch.tensor(losses))
         # Add loss to total loss
         total_loss.append(ensemble_loss.item())
         # optimize
