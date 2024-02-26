@@ -37,7 +37,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
         for i, classifier in enumerate(classifiers):
             classifier_state_dict = classifier.state_dict()
             with torch.no_grad():
-                for name, param in classifier_state_dict.item():
+                for name, param in classifier_state_dict.items():
                     param.copy_(classifiers_weights[:, :, i].view(-1)[0:param.numel()].view(param.shape))
 
         # Perform dynamic ensemble
