@@ -73,9 +73,10 @@ if __name__ == '__main__':
 
         # Validation Loop
         generator.eval()
-        avg_loss, accuracy = train_eval_loop(generator, classifiers, val_loader, input_size_G,
-                                             knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
-                                             'validation')
+        with torch.no_grad():
+            avg_loss, accuracy = train_eval_loop(generator, classifiers, val_loader, input_size_G,
+                                                 knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
+                                                 'validation')
         print(f'Epoch {epoch + 1}/{epochs}, Validation Loss: {avg_loss:.4f}, Validation Accuracy: {accuracy:.4f}')
 
         if best_loss > avg_loss:
@@ -86,6 +87,9 @@ if __name__ == '__main__':
                 generator.load_state_dict(best_weights_G)
                 break
 
+    for i, classifier in enumerate(classifiers):
+        torch.save(classifier.state_dict(), f'new/model{i}.pt')
+        
     # Testing Loop
     avg_loss, accuracy = train_eval_loop(generator, classifiers, test_loader, input_size_G,
                                          knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
