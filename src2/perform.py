@@ -30,7 +30,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
     corrects = 0
     for inputs, labels in data_loader:
         inputs, labels = inputs.to(device), labels.to(device)
-        input_G = torch.randn(1, input_size_G)
+        input_G = torch.randn(1, input_size_G).to(device)
         classifiers_weights = generator(input_G).cpu()
 
         # Assign the fake weights to the Classifiers
