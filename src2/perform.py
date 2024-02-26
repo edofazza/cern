@@ -98,7 +98,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
         print('TENSOR OUTPUT')
         tensor_outputs = torch.tensor([t.detach().cpu().numpy() for t in outputs_list], device='cuda:0')
         print(tensor_outputs.reshape(tensor_outputs.size(0), tensor_outputs.size(2)).size())
-        tensor_outputs = torch.nn.functional.softmax(tensor_outputs, dim=1)
+        tensor_outputs = torch.nn.functional.softmax(tensor_outputs.reshape(tensor_outputs.size(0), tensor_outputs.size(2)), dim=1)
         print(tensor_outputs.shape)
         ensemble_loss = criterion_G(tensor_outputs, labels)
         # Get loss from dynamic ensemble
