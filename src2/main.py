@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     for i, classifier in enumerate(classifiers):
         torch.save(classifier.state_dict(), f'new/model{i}.pt')
-        
+
     # Testing Loop
     avg_loss, accuracy = train_eval_loop(generator, classifiers, test_loader, input_size_G,
                                          knn, k, pairs, device, criterion_G, optimizer_G, batch_size,

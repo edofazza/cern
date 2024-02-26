@@ -43,7 +43,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
         # Perform dynamic ensemble
         losses = []
         for input, label in zip(inputs, labels):
-            input_numpy = input.numpy()
+            input_numpy = input.detach().cpu().numpy()
             input_numpy = input_numpy.reshape(1, input_numpy.shape[0] * input_numpy.shape[1] * input_numpy.shape[2])
             indices = knn.kneighbors(input_numpy, return_distance=False)[0]
 
