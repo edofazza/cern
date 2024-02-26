@@ -91,7 +91,7 @@ def train_eval_loop(generator, classifiers, data_loader, input_size_G, knn, k, p
             #print(label.to(device))
             #losses.append(criterion_G(predicted, torch.tensor([label.item()], device='cuda')))
 
-            if predicted.detach().cpu() == label:
+            if predicted.detach() == label:
                 corrects += 1
 
         # TODO: from outputs list get tensor for computing the loss
