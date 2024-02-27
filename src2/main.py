@@ -11,11 +11,11 @@ from typing import List
 from dataset import get_CIFAR
 from lenet import LeNet
 from generator import Generator
-from perform import train_eval_loop
-
+from perform import eval_loop, train_loop
 
 if __name__ == '__main__':
     torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     transform = transforms.Compose([
@@ -28,9 +28,9 @@ if __name__ == '__main__':
     # Define Generator
     #   the generator has an output equal to the number of parameters
     #   times how many classifier are present
-    input_size_G = 100
     output_size_G = sum(p.numel() for p in LeNet().parameters())
     num_classifiers = 2
+    input_size_G = output_size_G * num_classifiers
     generator = Generator(input_size_G, output_size_G, num_classifiers).to(device)
 
     # Define F
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     # samples for KNN
     pairs = []
-    k = 4
+    k = 3
     for inputs, labels in train_loader:
         for input, label in zip(inputs, labels):
             pairs.append((input.reshape(input.shape[0] * input.shape[1] * input.shape[2]), label))
@@ -66,17 +66,15 @@ if __name__ == '__main__':
     for epoch in range(epochs):
         # Training loop
         generator.train()
-        avg_loss, accuracy = train_eval_loop(generator, classifiers, train_loader, input_size_G,
-                                             knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
-                                             'training')
+        avg_loss, accuracy = train_loop(generator, classifiers, train_loader, input_size_G,
+                                        knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
+                                        'training')
         print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {avg_loss:.4f}, Training Accuracy: {accuracy:.4f}')
 
         # Validation Loop
         generator.eval()
         with torch.no_grad():
-            avg_loss, accuracy = train_eval_loop(generator, classifiers, val_loader, input_size_G,
-                                                 knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
-                                                 'validation')
+            avg_loss, accuracy = eval_loop(classifiers, test_loader, knn, k, pairs, criterion_G, device, batch_size)
         print(f'Epoch {epoch + 1}/{epochs}, Validation Loss: {avg_loss:.4f}, Validation Accuracy: {accuracy:.4f}')
 
         if best_loss > avg_loss:
@@ -91,7 +89,5 @@ if __name__ == '__main__':
         torch.save(classifier.state_dict(), f'new/model{i}.pt')
 
     # Testing Loop
-    avg_loss, accuracy = train_eval_loop(generator, classifiers, test_loader, input_size_G,
-                                         knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
-                                         'test')
+    avg_loss, accuracy = eval_loop(classifiers, test_loader, knn, k, pairs, criterion_G, device, batch_size)
     print(f'Test Loss: {avg_loss:.4f}, Test Accuracy: {accuracy:.4f}')
