@@ -29,7 +29,7 @@ def train_loop(generator, classifiers, data_loader, input_size_G, knn, k, pairs,
     corrects = 0
     losses = 0
     input_G = torch.randn(1, input_size_G).to(device)
-    print(input_G.shape)
+
     for inputs, labels in data_loader:
         inputs, labels = inputs.to(device), labels.to(device)
         classifiers_weights = generator(input_G).cpu()
@@ -41,7 +41,7 @@ def train_loop(generator, classifiers, data_loader, input_size_G, knn, k, pairs,
                 for name, param in classifier_state_dict.items():
                     param.copy_(classifiers_weights[:, :, i].view(-1)[0:param.numel()].view(param.shape))
         input_G = classifiers_weights.view(-1, input_size_G).to(device)
-        print(input_G.shape)
+
         # Perform dynamic ensemble
         for input, label in zip(inputs, labels):
             input_numpy = input.detach().cpu().numpy()
