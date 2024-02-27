@@ -29,6 +29,7 @@ def train_loop(generator, classifiers, data_loader, input_size_G, knn, k, pairs,
     corrects = 0
     losses = 0
     input_G = torch.randn(1, input_size_G).to(device)
+    print(input_G)
     for inputs, labels in data_loader:
         inputs, labels = inputs.to(device), labels.to(device)
         classifiers_weights = generator(input_G).cpu()
