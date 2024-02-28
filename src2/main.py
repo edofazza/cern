@@ -30,7 +30,7 @@ if __name__ == '__main__':
     #   times how many classifier are present
     output_size_G = sum(p.numel() for p in LeNet().parameters())
     num_classifiers = 2
-    input_size_G = output_size_G * num_classifiers
+    input_size_G = 100
     generator = Generator(input_size_G, output_size_G, num_classifiers).to(device)
 
     # Define F
@@ -63,10 +63,11 @@ if __name__ == '__main__':
     early_stopping_counter = 0
     best_weights_G = generator.state_dict()
     best_loss = 100000
+    input_G = torch.randn(1, input_size_G).to(device)
     for epoch in range(epochs):
         # Training loop
         generator.train()
-        avg_loss, accuracy = train_loop(generator, classifiers, train_loader, input_size_G,
+        avg_loss, accuracy = train_loop(generator, classifiers, train_loader, input_G,
                                         knn, k, pairs, device, criterion_G, optimizer_G, batch_size,
                                         'training')
         print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {avg_loss:.4f}, Training Accuracy: {accuracy:.4f}')

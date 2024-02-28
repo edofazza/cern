@@ -24,11 +24,10 @@ class EnsembleModel(nn.Module):
         return torch.mean(torch.stack(outputs), dim=0)
 
 
-def train_loop(generator, classifiers, data_loader, input_size_G, knn, k, pairs, device,
+def train_loop(generator, classifiers, data_loader, input_G, knn, k, pairs, device,
                criterion_G, optimizer_G, batch_size, mode):
     corrects = 0
     losses = 0
-    input_G = torch.randn(1, input_size_G).to(device)
 
     for inputs, labels in data_loader:
         inputs, labels = inputs.to(device), labels.to(device)
@@ -40,7 +39,6 @@ def train_loop(generator, classifiers, data_loader, input_size_G, knn, k, pairs,
             with torch.no_grad():
                 for name, param in classifier_state_dict.items():
                     param.copy_(classifiers_weights[:, :, i].view(-1)[0:param.numel()].view(param.shape))
-        input_G = classifiers_weights.view(-1, input_size_G).to(device)
 
         # Perform dynamic ensemble
         for input, label in zip(inputs, labels):
